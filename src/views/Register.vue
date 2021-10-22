@@ -2,7 +2,7 @@
   <div class="wrapper">
     <img class="wrapper__img" src="http://www.dell-lee.com/imgs/vue3/user.png"/>
 
-    <van-form ref="loginForm" @submit="onSubmit">
+    <van-form ref="registerForm" @submit="onSubmit">
       <van-cell-group inset>
         <van-field
           v-model="userName"
@@ -13,25 +13,21 @@
           type="password"
           placeholder="请输入密码"
         />
+        <van-field
+          v-model="phoneNumber"
+          placeholder="请输入手机号"
+        />
+        <van-field
+          v-model="email"
+          placeholder="请输入邮箱"
+        />
       </van-cell-group>
       <div style="margin: 16px;">
         <van-button round block type="primary" native-type="submit">
-          登录
+          注册
         </van-button>
       </div>
     </van-form>
-
-    <!-- gitee登录 -->
-    <div>
-      <a
-        href="https://gitee.com/oauth/authorize?client_id=e21ada1875792c7df538e290dc403e377289ccfa94343a4aed715cd7f9297ee2&redirect_uri=http://www.codeman.ink:8848/login&response_type=code"
-      >
-        <div class="otherLoginItem">
-          <!-- <img src="~assets/img/gitee.png" alt="" /> -->
-          <span>使用Gitee一键登录</span>
-        </div>
-      </a>
-    </div>
   </div>
 </template>
 
@@ -39,37 +35,40 @@
 
 import { reactive, toRefs, getCurrentInstance } from 'vue'
 import { useRouter } from 'vue-router'
-import { useStore } from 'vuex'
 
 export default {
-  name: 'Login',
+  name: 'Register',
   setup () {
     const { proxy } = getCurrentInstance()
     const router = useRouter()
-    const store = useStore()
-    const loginForm = reactive({
+    const registerForm = reactive({
       userName: '',
-      passWord: ''
+      passWord: '',
+      email: '',
+      phoneNumber: ''
     })
-    const { userName, passWord } = toRefs(loginForm)
+    console.log(proxy.$api)
+    const { userName, passWord, phoneNumber, email } = toRefs(registerForm)
 
     // 提交时进行校验：
     const onSubmit = () => {
-      proxy.$refs.loginForm.validate().then(async () => {
-        const { code, data } = await proxy.$api.login({ ...loginForm })
+      proxy.$refs.registerForm.validate().then(async () => {
+        const { code, msg } = await proxy.$api.register({ ...registerForm })
         if (code === 200) {
-          console.log('登录成功')
-          // 数据进行保存
-          store.commit('saveUserInfo', data)
-          router.push('/')
+          alert('注册成功')
+          setTimeout(() => {
+            router.push('/login')
+          }, 1000)
         } else {
-          console.log('登陆失败')
+          console.log(msg)
         }
       })
     }
     return {
       userName,
       passWord,
+      phoneNumber,
+      email,
       onSubmit
     }
   }

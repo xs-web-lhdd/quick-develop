@@ -20,8 +20,12 @@ const service = axios.create({
 // 请求拦截
 service.interceptors.request.use((req) => {
   const headers = req.headers
-  const { token = '' } = storage.getItem('userInfo') || {}
-  if (!headers.Authorization) headers.Authorization = 'Bear ' + token
+  console.log(headers)
+  const { tokenValue = '', tokenName = '' } = storage.getItem('userInfo') || {}
+  console.log(tokenName, tokenValue)
+  // 携带token！！！还有一点bug
+  if (!headers.Authorization) headers.Authorization = `${tokenName}:${tokenValue}`
+  if (!headers[tokenName]) headers[tokenName] = tokenValue
   return req
 })
 

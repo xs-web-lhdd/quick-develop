@@ -44,11 +44,28 @@ export default {
   },
   // 给文章点赞：
   supportArticle (params) {
-    console.log(params)
     return request({
       url: `/dqlike/like/${params}`,
       method: 'get'
       // data: params
+      // mock: true
+    })
+  },
+  // 获取文章的点赞数量：
+  getArticleLike (params) {
+    return request({
+      url: `/dqlike/getlikes/${params}`,
+      method: 'get'
+      // data: params
+      // mock: true
+    })
+  },
+  // 根据文章ID获取文章的所有评论
+  getArticleComments (params) {
+    return request({
+      url: '/dqcomment/superlist',
+      method: 'get',
+      data: params
       // mock: true
     })
   }

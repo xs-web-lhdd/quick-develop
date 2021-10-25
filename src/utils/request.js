@@ -7,6 +7,7 @@ import config from './../config'
 // import { Toast } from 'vant'
 import router from './../router'
 import storage from './storage'
+import store from '../store'
 
 const TOKEN_INVALID = 'Token认证失败，请重新登录'
 const NETWORK_ERROR = '网络请求异常，请稍后重试'
@@ -19,9 +20,12 @@ const service = axios.create({
 
 // 请求拦截
 service.interceptors.request.use((req) => {
+  // 发送请求时将加载动画展示：
+  store.commit('changeLoading', true)
+
   const headers = req.headers
   console.log(headers)
-  const { tokenValue = '', tokenName = '' } = storage.getItem('userInfo') || {}
+  const { tokenValue = '11', tokenName = 'Maoyan' } = storage.getItem('userInfo') || {}
   console.log(tokenName, tokenValue)
   // 携带token！！！还有一点bug
   if (!headers.Authorization) headers.Authorization = `${tokenName}:${tokenValue}`
@@ -31,6 +35,9 @@ service.interceptors.request.use((req) => {
 
 // 响应拦截
 service.interceptors.response.use((res) => {
+  // 请求完毕后将动画进行隐藏：
+  store.commit('changeLoading', false)
+
   const { code, data, msg } = res.data
   if (code === 200) {
     return { code, data, msg }

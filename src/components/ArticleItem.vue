@@ -1,57 +1,49 @@
 <template>
-  <Header />
-  <div class="home">
-    <div class="list" v-for="item in list" :key="item.articleId">
-      <router-link :to="`/article/${item.articleId}`">
-        <ArticleItem :item="item"/>
-      </router-link>
-    </div>
-    <div class="loadMore" v-if="!isMaxLength && list.length > 0" @click="allArticles">点击加载更多</div>
+<div class="list">
+  <div class="list__top">
+    <div class="list__top__name">{{item.authorNickname}}</div>
+    <div class="list__top__splitLine">|</div>
+    <div class="list__top__time">{{item.updateTime}}</div>
   </div>
-  <Loading />
+  <div class="list__title">文章标题：{{item.articleTitle}}</div>
+  <div class="list__middle">
+    <div class="list__middle__content">{{item.articleContent}}</div>
+    <img class="list__middle__img" :src="item.articleImage ? item.articleImage : '../assets/img/defaultBgc.jpg'" v-lazy="item.articleImage" alt="">
+  </div>
+  <div class="list__bottom">
+    <div class="list__bottom__left">
+      <div class="list__bottom__left__support iconfont">&#xe816; 11</div>
+      <div class="list__bottom__left__comment iconfont">&#xe6a7;&nbsp;{{item.commentNum}}</div>
+    </div>
+    <div class="list__bottom__type">
+      <div class="list__bottom__type__item">{{item.typeName}}</div>
+    </div>
+    <div class="list__bottom__delete" v-if="deleteIsShow" @click.capture="deleteArticle">
+      <div>删除</div>
+    </div>
+  </div>
+</div>
 </template>
 
 <script>
-import { getCurrentInstance, reactive, ref, onMounted } from 'vue'
-import Loading from '../components/Loading.vue'
-import Header from '../components/Header.vue'
-import ArticleItem from '../components/ArticleItem.vue'
-
+import { getCurrentInstance } from 'vue'
 export default {
-  name: 'Home',
-  components: { Loading, Header, ArticleItem },
-  setup () {
-    // 实例化：
-    const { proxy } = getCurrentInstance()
-    const sqlist = reactive({
-      pageNum: 0,
-      pageSize: 10
-    })
-    const isMaxLength = ref(false)
-    // 初始页面：
-    const list = ref([])
-    const allArticles = async () => {
-      sqlist.pageNum++
-      const res = await proxy.$api.allArticles({ ...sqlist })
-      // 后端返回的最大页面数量
-      const pages = res.data.pages
-      // 如果达到最大页面数量，就取消加载更多按钮
-      if (sqlist.pageNum >= pages) {
-        isMaxLength.value = true
-      }
-      // 后端返回的数据列表：用于渲染
-      const allList = res.data.list
-      allList.forEach(item => {
-        list.value.push(item)
-      })
+  name: 'ArticleItem',
+  props: {
+    item: {},
+    articleItem: {},
+    deleteIsShow: {
+      default: false
     }
-    onMounted(() => {
-      allArticles()
-    })
+  },
+  setup (props) {
+    const { proxy } = getCurrentInstance()
+    const deleteArticle = async () => {
+      const res = await proxy.$api.deleteCurrentArticle(props.articleItem)
+      console.log(res)
+    }
     return {
-      allArticles,
-      list,
-      isMaxLength
+      deleteArticle
     }
   }
 }
@@ -60,6 +52,7 @@ export default {
 <style lang="scss" scoped>
 .list{
   margin: .2rem .2rem 0 .2rem;
+  background-color: #fff;
   &__top{
     display: flex;
     margin: .1rem .1rem .05rem 0;
@@ -141,13 +134,10 @@ export default {
         background: #fafafa;
       }
     }
+    &__delete{
+      color: #e5e6eb;
+      margin: .05rem;
+    }
   }
-}
-.loadMore{
-  width: 2rem;
-  height: .4rem;
-  margin: 0 auto;
-  text-align: center;
-  line-height: .4rem;
 }
 </style>

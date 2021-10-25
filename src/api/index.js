@@ -68,5 +68,41 @@ export default {
       data: params
       // mock: true
     })
+  },
+  // 获取当前用户个人信息：
+  getNowUserInfo () {
+    return request({
+      url: '/dquser/getnowuser',
+      method: 'get'
+      // data: params
+      // mock: true
+    })
+  },
+  // 通过id获取用户个人信息：
+  getUserInfobyId (id) {
+    return request({
+      url: `/dquser/${id}`,
+      method: 'get'
+      // data: params
+      // mock: true
+    })
+  },
+  // 根据用户id查询出自己的所有文章：
+  getArticlesbyId (id) {
+    return request({
+      url: `/dqarticle/author/${id}`,
+      method: 'get'
+      // data: params
+      // mock: true
+    })
+  },
+  // 删除用户子的某篇文章：
+  deleteCurrentArticle (id) {
+    return request({
+      url: `/dqarticle/delete/${id}`,
+      method: 'get'
+      // data: params
+      // mock: true
+    })
   }
 }

@@ -1,4 +1,5 @@
 <template>
+  <Header />
   <div class="about" v-if="message">
     <!-- 文章头部信息：作者头像、点赞... -->
     <div class="top">
@@ -83,14 +84,20 @@
       </div>
     </div>
   </div>
+  <Loading />
 </template>
 
 <script>
 import { getCurrentInstance, onMounted, ref, computed, reactive } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import MarkDownIt from 'markdown-it'
+// 引入加载,头部组件
+import Loading from '../components/Loading.vue'
+import Header from '../components/Header.vue'
 
 export default {
+  name: 'Article',
+  components: { Loading, Header },
   setup () {
     // 实例化：
     const route = useRoute()

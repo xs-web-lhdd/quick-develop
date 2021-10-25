@@ -9,7 +9,7 @@ import storage from './utils/storage'
 import api from './api'
 
 // 导入 Vant
-import { Lazyload, Form, Field, CellGroup, Button } from 'vant'
+import { Lazyload, Form, Field, CellGroup, Button, Loading } from 'vant'
 import 'vant/lib/index.css'
 
 // 导入 Element
@@ -44,5 +44,6 @@ app
   .use(Field)
   .use(CellGroup)
   .use(Button)
+  .use(Loading)
   .use(VueMarkdownEditor)
   .mount('#app')

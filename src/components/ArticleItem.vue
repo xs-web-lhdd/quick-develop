@@ -18,7 +18,7 @@
     <div class="list__bottom__type">
       <div class="list__bottom__type__item">{{item.typeName}}</div>
     </div>
-    <div class="list__bottom__delete" v-if="deleteIsShow" @click.capture="deleteArticle">
+    <div class="list__bottom__delete" v-if="deleteIsShow" @click.stop="deleteArticle">
       <div>删除</div>
     </div>
   </div>
@@ -36,11 +36,13 @@ export default {
       default: false
     }
   },
-  setup (props) {
+  emits: ['deleteOk'],
+  setup (props, { emit }) {
     const { proxy } = getCurrentInstance()
+    // 删除某篇文章：
     const deleteArticle = async () => {
-      const res = await proxy.$api.deleteCurrentArticle(props.articleItem)
-      console.log(res)
+      const { code } = await proxy.$api.deleteCurrentArticle(props.articleItem)
+      if (code === 200) { emit('deleteOk') }
     }
     return {
       deleteArticle

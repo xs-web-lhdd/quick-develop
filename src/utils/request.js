@@ -4,7 +4,7 @@
  */
 import axios from 'axios'
 import config from './../config'
-// import { Toast } from 'vant'
+import { Toast } from 'vant'
 import router from './../router'
 import storage from './storage'
 import store from '../store'
@@ -24,9 +24,7 @@ service.interceptors.request.use((req) => {
   store.commit('changeLoading', true)
 
   const headers = req.headers
-  console.log(headers)
   const { tokenValue = '11', tokenName = 'Maoyan' } = storage.getItem('userInfo') || {}
-  console.log(tokenName, tokenValue)
   // 携带token！！！还有一点bug
   if (!headers.Authorization) headers.Authorization = `${tokenName}:${tokenValue}`
   if (!headers[tokenName]) headers[tokenName] = tokenValue
@@ -42,18 +40,19 @@ service.interceptors.response.use((res) => {
   if (code === 200) {
     return { code, data, msg }
   } else if (code === 500001) {
-    // Toast.error(TOKEN_INVALID)
-    alert(TOKEN_INVALID)
+    Toast.fail(TOKEN_INVALID)
     setTimeout(() => {
       router.push('/login')
     }, 1500)
     return Promise.reject(TOKEN_INVALID)
   } else if (code === 500) {
-    // alert('用户名或密码错误！')
+    Toast('用户名或密码错误！')
+    return { code, data, msg }
+  } else if (code === 404) {
+    console.log(msg)
     return { code, data, msg }
   } else {
-    // Toast.error(msg || NETWORK_ERROR)
-    alert(msg || NETWORK_ERROR)
+    Toast.fail(msg || NETWORK_ERROR)
     return Promise.reject(msg || NETWORK_ERROR)
   }
 })

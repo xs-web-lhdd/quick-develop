@@ -1,6 +1,6 @@
 <template>
   <div class="header">
-    <div class="header__img">
+    <div class="header__img" @click="changeHome">
       <img class="header__img__img" src="../assets/img/logo.svg" alt="">
     </div>
     <div class="header__title">
@@ -13,25 +13,40 @@
       <input type="text" placeholder="来吧，皮卡丘！">
     </div>
     <div class="header__userImg" @click="changeMine">
-      <img class="header__userImg__img" src="../assets/img/1.webp" alt="">
+      <img class="header__userImg__img" :src="userAvatar" alt="">
     </div>
   </div>
 </template>
 
 <script>
 import { useRouter } from 'vue-router'
-import { getCurrentInstance } from 'vue'
+import { getCurrentInstance, onMounted, ref } from 'vue'
+import { useStore } from 'vuex'
 
 export default {
   name: 'Header',
   setup () {
     const router = useRouter()
     const { proxy } = getCurrentInstance()
+    const store = useStore()
     const { loginId } = proxy.$storage.getItem('userInfo')
     const changeMine = () => {
       router.push(`/mine/${loginId}`)
     }
-    return { changeMine }
+    const changeHome = () => {
+      router.push('/')
+    }
+    // 获取用户个人信息：
+    const userAvatar = ref('')
+    const getUserInfobyId = async () => {
+      const { data } = await proxy.$api.getNowUserInfo()
+      userAvatar.value = data.avatar
+      store.commit('saveUserAllInfo', data)
+    }
+    onMounted(() => {
+      getUserInfobyId()
+    })
+    return { changeMine, changeHome, getUserInfobyId, userAvatar }
   }
 }
 </script>

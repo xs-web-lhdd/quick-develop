@@ -4,7 +4,7 @@
   <div class="wrapper">
     <div class="mine">
       <div class="mine__avatar">
-        <img src="../assets/img/1.webp" alt="">
+        <img :src="showUserInfo.avatar" alt="">
       </div>
       <div class="mine__nickName">{{showUserInfo.nickeName}}</div>
       <div class="mine__sex">{{sexFormat}}</div>
@@ -12,10 +12,11 @@
     </div>
     <div class="bgc"></div>
     <div class="articles list" v-for="item in articlesList" :key="item.articleId">
-      <router-link :to="`/article/${item.articleId}`">
-        <ArticleItem :item="item" :articleItem="item.articleId" deleteIsShow="true" />
-      </router-link>
+      <div @click.stop="changeInfo(`/article/${item.articleId}`)">
+        <ArticleItem :item="item" :articleItem="item.articleId" deleteIsShow="true" @deleteOk="deleteOk" />
+      </div>
     </div>
+    <Writing />
   </div>
 </template>
 
@@ -25,10 +26,11 @@ import { useRoute, useRouter } from 'vue-router'
 import { sexOptions } from '../config/constants'
 import Header from '../components/Header.vue'
 import ArticleItem from '../components/ArticleItem.vue'
+import Writing from '../components/Writing.vue'
 
 export default {
   name: 'Mine',
-  components: { Header, ArticleItem },
+  components: { Header, ArticleItem, Writing },
   setup () {
     // 实例化：
     const { proxy } = getCurrentInstance()
@@ -54,8 +56,17 @@ export default {
       const { code, data } = await proxy.$api.getArticlesbyId(currentUserId)
       if (code === 200) {
         articlesList.value = data.list
-        console.log(articlesList)
+      } else if (code === 404) { // 用户没有文章的情况
+        articlesList.value = []
       }
+    }
+    // 点击文字进行跳转：
+    const changeInfo = (value) => {
+      router.push(value)
+    }
+    // 删除成功得回调：
+    const deleteOk = () => {
+      getArticlesbyId()
     }
     onMounted(() => {
       getUserInfobyId()
@@ -67,7 +78,10 @@ export default {
     return {
       showUserInfo,
       sexFormat,
-      articlesList
+      articlesList,
+      changeInfo,
+      getArticlesbyId,
+      deleteOk
     }
   }
 }
@@ -118,5 +132,4 @@ export default {
     max-width: 2rem;
   }
 }
-
 </style>

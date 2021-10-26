@@ -104,5 +104,23 @@ export default {
       // data: params
       // mock: true
     })
+  },
+  // 获取文章的分类：
+  getArticleType () {
+    return request({
+      url: '/dqtype/list',
+      method: 'get'
+      // data: params
+      // mock: true
+    })
+  },
+  // 新建文章接口：
+  addArticle (params) {
+    return request({
+      url: '/dqarticle/add',
+      method: 'post',
+      data: params
+      // mock: true
+    })
   }
 }

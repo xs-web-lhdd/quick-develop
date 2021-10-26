@@ -9,6 +9,7 @@
     <div class="loadMore" v-if="!isMaxLength && list.length > 0" @click="allArticles">点击加载更多</div>
   </div>
   <Loading />
+  <Writing />
 </template>
 
 <script>
@@ -16,10 +17,11 @@ import { getCurrentInstance, reactive, ref, onMounted } from 'vue'
 import Loading from '../components/Loading.vue'
 import Header from '../components/Header.vue'
 import ArticleItem from '../components/ArticleItem.vue'
+import Writing from '../components/Writing.vue'
 
 export default {
   name: 'Home',
-  components: { Loading, Header, ArticleItem },
+  components: { Loading, Header, ArticleItem, Writing },
   setup () {
     // 实例化：
     const { proxy } = getCurrentInstance()

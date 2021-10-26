@@ -117,9 +117,14 @@ export default {
     const commentsNum = ref(null)
     const commentsList = ref([])
     const getArticleComments = async () => {
-      const res = await proxy.$api.getArticleComments({ ...commentParams })
-      commentsList.value = res.data.list
-      commentsNum.value = res.data.list.length
+      const { code, data } = await proxy.$api.getArticleComments({ ...commentParams })
+      if (code === 200) {
+        commentsList.value = data.list
+        commentsNum.value = data.list.length
+      } else if (code === 404) { // 评论数量为 0
+        commentsList.value = []
+        commentsNum.value = 0
+      }
     }
     // 获取文章的点赞数量：
     const likeCount = ref(null)
@@ -257,6 +262,8 @@ img{
     min-height: .5rem;
     max-width: 3.24rem;
     min-width: 3.24rem;
+    border: none;
+    background-color: #f4f5f5;
   }
   &__button{
     float: right;
@@ -274,6 +281,7 @@ img{
     cursor: pointer;
   }
   &__all{
+    padding-bottom: .2rem;
     &__title{
       display: block;
       margin-top: .15rem;

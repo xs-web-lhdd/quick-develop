@@ -15,6 +15,15 @@ export default {
       // mock: true
     })
   },
+  // 通过 gitee 进行登录:
+  loginByGitee (params) {
+    return request({
+      url: '/login/gitee',
+      method: 'post',
+      data: params
+      // mock: true
+    })
+  },
   // 注册：
   register (params) {
     return request({
@@ -42,10 +51,28 @@ export default {
       // mock: true
     })
   },
+  // 查询点赞文章的状态：
+  supportArticleStatus (params) {
+    return request({
+      url: `/dqlike/status/${params}`,
+      method: 'get'
+      // data: params
+      // mock: true
+    })
+  },
   // 给文章点赞：
   supportArticle (params) {
     return request({
       url: `/dqlike/like/${params}`,
+      method: 'get'
+      // data: params
+      // mock: true
+    })
+  },
+  // 给文章取消点赞：
+  cancelSupportArticle (params) {
+    return request({
+      url: `/dqlike/unlike/${params}`,
       method: 'get'
       // data: params
       // mock: true
@@ -75,6 +102,15 @@ export default {
       url: '/dquser/getnowuser',
       method: 'get'
       // data: params
+      // mock: true
+    })
+  },
+  // 更新当前用户的个人信息：
+  updateUserInfo (params) {
+    return request({
+      url: '/dquser/update',
+      method: 'post',
+      data: params
       // mock: true
     })
   },
@@ -114,6 +150,15 @@ export default {
       // mock: true
     })
   },
+  // 对文章进行一级评论：
+  addComment (params) {
+    return request({
+      url: '/dqcomment/add',
+      method: 'post',
+      data: params
+      // mock: true
+    })
+  },
   // 新建文章接口：
   addArticle (params) {
     return request({
@@ -121,6 +166,20 @@ export default {
       method: 'post',
       data: params
       // mock: true
+    })
+  },
+  // 退出登录:
+  logout () {
+    return request({
+      url: '/dquser/logout',
+      method: 'get'
+    })
+  },
+  // 删除用户自己:
+  deleteMyself () {
+    return request({
+      url: '/dquser/delete',
+      method: 'get'
     })
   }
 }

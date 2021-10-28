@@ -3,7 +3,7 @@
   <div class="about" v-if="message">
     <!-- 文章头部信息：作者头像、点赞... -->
     <div class="top">
-      <div class="top__left">
+      <div class="top__left" @click="() => changeUserPage(currentUserId)">
         <img class="top__left__img" :src="message.avatar" alt="">
       </div>
       <div class="top__right">
@@ -24,128 +24,89 @@
         <div class="bottom__top__type">前端</div>
       </div>
       <div class="bottom__bottom">
-        <div class="iconfont bottom__bottom__support" @click="supportArticle">&#xe611;{{likeCount}}</div>
+        <div class="iconfont bottom__bottom__support" v-if="!isSupport" @click="supportArticle">&#xe8ad;&nbsp;{{likeCount}}</div>
+        <div class="iconfont bottom__bottom__support" v-else :class="[isSupport ? 'bottom__bottom__isSupport': '']" @click="cancelSupportArticle">&#xe8c3;&nbsp;{{likeCount}}</div>
         <div class="bottom__bottom__avatar">
           <img :src="message.avatar" alt="">
         </div>
       </div>
     </div>
     <!-- 评论区 -->
-    <div class="comment">
-      <div class="comment__top">
-        <textarea class="comment__area" cols="52" rows="10" placeholder="输入您的评论"></textarea>
-        <button class="comment__button">发表评论</button>
-      </div>
-      <div class="comment__all">
-        <span class="comment__all__title">全部评论({{commentsNum}})</span>
-        <template v-for="item in commentsList" :key="item.commentId">
-          <div class="comment__all__item" v-if="item.commentType === '1'">
-            <img class="comment__all__item__left" :src="item.commentUserAvatar" alt="">
-            <div class="comment__all__item__right">
-              <div class="comment__all__item__right__top">
-                <div class="comment__all__item__right__top__one">{{item.commentUserNickName}}</div>
-                <div class="comment__all__item__right__top__two">|</div>
-                <div class="comment__all__item__right__top__three">time:xxxx-xx-xx</div>
-              </div>
-              <div class="comment__all__item__right__main">
-                {{item.content}}
-              </div>
-              <div class="comment__all__item__right__bottom">
-                <div class="iconfont comment__all__item__right__bottom__support">&#xe611;&nbsp;点赞</div>
-                <div class="iconfont comment__all__item__right__bottom__comment">&#xe6a7;&nbsp;评论</div>
-              </div>
-
-              <!-- 评论区中的二级评论 -->
-              <div class="comment__all">
-                <template v-for="item in commentsList" :key="item.commentId">
-                  <div class="comment__all__item" style="border-bottom: none;" v-if="item.commentType === '2'">
-                    <img class="comment__all__item__left" :src="item.commentUserAvatar" alt="">
-                    <div class="comment__all__item__right">
-                      <div class="comment__all__item__right__top">
-                        <div class="comment__all__item__right__top__one">{{item.commentUserNickName}}</div>
-                        <div class="comment__all__item__right__top__two">|</div>
-                        <div class="comment__all__item__right__top__three">time:xxxx-xx-xx</div>
-                      </div>
-                      <div class="comment__all__item__right__main">
-                        {{item.content}}
-                      </div>
-                      <div class="comment__all__item__right__bottom">
-                        <div class="iconfont comment__all__item__right__bottom__support">&#xe611;&nbsp;点赞</div>
-                        <div class="iconfont comment__all__item__right__bottom__comment">&#xe6a7;&nbsp;评论</div>
-                      </div>
-                    </div>
-                  </div>
-                </template>
-              </div>
-
-            </div>
-          </div>
-        </template>
-      </div>
-    </div>
+    <CommentArea />
   </div>
-  <Loading />
+  <!-- <Loading /> -->
 </template>
 
 <script>
-import { getCurrentInstance, onMounted, ref, computed, reactive } from 'vue'
+import { getCurrentInstance, onMounted, ref, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import MarkDownIt from 'markdown-it'
-// 引入加载,头部组件
-import Loading from '../components/Loading.vue'
+// 引入加载,头部,评论区组件
+// import Loading from '../components/Loading.vue'
 import Header from '../components/Header.vue'
+import CommentArea from '../components/CommentArea.vue'
 
 export default {
   name: 'Article',
-  components: { Loading, Header },
+  components: { Header, CommentArea },
   setup () {
     // 实例化：
     const route = useRoute()
     const router = useRouter()
     const { proxy } = getCurrentInstance()
-    const currentId = route.params.id
+    const currentArticleId = route.params.id
+    const currentUserId = ref()
     const message = ref(null)
     // 得到本篇文章的详情：
     const articleDetail = async () => {
-      const res = await proxy.$api.articleDetail({ articleId: currentId })
+      const res = await proxy.$api.articleDetail({ articleId: currentArticleId })
       message.value = res.data.list[0]
-    }
-    // 得到本篇文章的所有评论
-    const commentParams = reactive({
-      articleId: currentId
-    })
-    const commentsNum = ref(null)
-    const commentsList = ref([])
-    const getArticleComments = async () => {
-      const { code, data } = await proxy.$api.getArticleComments({ ...commentParams })
-      if (code === 200) {
-        commentsList.value = data.list
-        commentsNum.value = data.list.length
-      } else if (code === 404) { // 评论数量为 0
-        commentsList.value = []
-        commentsNum.value = 0
-      }
+      currentUserId.value = res.data.list[0].userId
     }
     // 获取文章的点赞数量：
     const likeCount = ref(null)
     const getArticleLike = async () => {
-      const { data } = await proxy.$api.getArticleLike(currentId)
+      const { data } = await proxy.$api.getArticleLike(currentArticleId)
       likeCount.value = data
     }
+    // 查询该篇文章的点赞状态:
+    const supportArticleState = async () => {
+      const { data, code } = await proxy.$api.supportArticleStatus(currentArticleId)
+      if (data === 1 && code === 200) { // 已经点过赞了
+        isSupport.value = true
+      }
+    }
+    // 点赞功能实现:
+    const isSupport = ref(false)
     // 给本篇文章点赞：
     const supportArticle = async () => {
-      const { code } = await proxy.$api.supportArticle(currentId)
+      const { code } = await proxy.$api.supportArticle(currentArticleId)
       if (code === 500) {
         alert('你还没有登录，请进行登录！！！')
         router.push('/login')
       } else if (code === 200) {
+        isSupport.value = true
         console.log('点赞成功！')
+        getArticleLike()
       }
+    }
+    // 取消给本篇文章点赞:
+    const cancelSupportArticle = async () => {
+      const { code } = await proxy.$api.cancelSupportArticle(currentArticleId)
+      if (code === 200) {
+        isSupport.value = false
+        console.log('取消点赞!')
+        getArticleLike()
+      }
+    }
+    // 点击用户头像跳转到用户对应界面：
+    const changeUserPage = (userId) => {
+      router.push(`/mine/${userId}`)
     }
     onMounted(() => {
       articleDetail()
       getArticleLike()
-      getArticleComments()
+      supportArticleState()
     })
     // 把内容转化为 markdown 进行展示
     const handleMarkDown = computed(() => {
@@ -165,19 +126,18 @@ export default {
       articleTime,
       likeCount,
       supportArticle,
-      commentsList,
-      commentsNum
+      cancelSupportArticle,
+      currentUserId,
+      changeUserPage,
+      isSupport
     }
   }
 }
 </script>
 
 <style lang="scss" scoped>
-img{
-  width: 2rem;
-}
 .about{
-  margin: .23rem .2rem 0 .2rem;
+  margin: .73rem .2rem 0 .2rem;
 }
 .top{
   display: flex;
@@ -186,7 +146,8 @@ img{
   &__left{
     margin-right: .1rem;
     &__img{
-      width: .5rem;
+      width: .4rem;
+      height: .4rem;
       border-radius: 50%;
     }
   }
@@ -234,18 +195,25 @@ img{
     }
   }
   &__bottom{
-    display: flex;
+    // display: flex;
     margin-bottom: .2rem;
     &__support{
+      float: left;
+      width: .3rem;
+      height: .3rem;
       padding-top: .05rem;
-      flex: 5;
+      flex: 1;
+    }
+    &__isSupport{
+      color: #007fff;
     }
     &__avatar{
-      flex: 1;
+      float: right;
       width: .3rem;
       img{
         display: block;
         width: .3rem;
+        height: .3rem;
         border-radius: 50%;
       }
     }
@@ -254,7 +222,7 @@ img{
 .comment{
   &__top{
     height: 0.9rem;
-    padding-bottom: .15rem;
+    padding-bottom: .3rem;
     border-bottom: .01rem solid #e5e6eb;
   }
   &__area{
@@ -263,7 +231,9 @@ img{
     max-width: 3.24rem;
     min-width: 3.24rem;
     border: none;
+    border-radius: .02rem;
     background-color: #f4f5f5;
+    padding: .05rem;
   }
   &__button{
     float: right;
@@ -272,10 +242,10 @@ img{
     appearance: none;
     background-color: #007fff;
     color: #fff;
-    border-radius: .01rem;
+    border-radius: .02rem;
     border: none;
     padding: .05rem .13rem;
-    margin-right: .04rem;
+    margin-right: .015rem;
     outline: none;
     transition: background-color .3s,color .3s;
     cursor: pointer;

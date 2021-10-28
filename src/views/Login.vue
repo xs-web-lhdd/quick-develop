@@ -61,12 +61,30 @@ export default {
           console.log('登录成功')
           // 数据进行保存
           store.commit('saveUserInfo', data)
+          proxy.$storage.setItem('isLogin', true)
           router.push('/')
         } else {
           console.log('登陆失败')
         }
       })
     }
+    // 使用gitee进行登录:
+    // const loginByGitee = async (code) => {
+    //   const res = await proxy.$api.loginByGitee({ code })
+    //   console.log(res)
+    //   if (res.data.code === 200) {
+    //     setTimeout(() => {
+    //       //   跳转至主界面
+    //       //
+    //     }, 500)
+    //   } else {
+    //     // ('登录失败,请稍后重试!')
+    //   }
+    // }
+    // if (router.query.code) {
+    //   console.log(router.query.code)
+    //   loginByGitee(router.query.code)
+    // }
     return {
       userName,
       passWord,

@@ -4,16 +4,22 @@
   <div class="wrapper">
     <div class="mine">
       <div class="mine__avatar">
-        <img :src="showUserInfo.avatar" alt="">
+        <img v-if="showUserInfo.avatar" :src="showUserInfo.avatar" alt="">
+        <img v-else src="../assets/img/defaultAvatar.jpg" alt="">
       </div>
       <div class="mine__nickName">{{showUserInfo.nickeName}}</div>
       <div class="mine__sex">{{sexFormat}}</div>
+      <div class="mine__tag">{{showUserInfo.role}}</div>
       <div class="mine__email">{{showUserInfo.email}}</div>
     </div>
     <div class="bgc"></div>
+    <div class="noArticle" v-if="!articlesList.length">
+      <div class="noArticle__icon iconfont">&#xe733;</div>
+      <div class="noArticle__tag">空空如也</div>
+    </div>
     <div class="articles list" v-for="item in articlesList" :key="item.articleId">
       <div @click.stop="changeInfo(`/article/${item.articleId}`)">
-        <ArticleItem :item="item" :articleItem="item.articleId" deleteIsShow="true" @deleteOk="deleteOk" />
+        <ArticleItem :item="item" :articleItem="item.articleId" :deleteIsShow="userId.toString() === currentUserId.toString()" @deleteOk="deleteOk" />
       </div>
     </div>
     <Writing />
@@ -36,14 +42,16 @@ export default {
     const { proxy } = getCurrentInstance()
     const router = useRouter()
     const route = useRoute()
+    // 拿出路由中命中的用户id和登录人的用户id，如果相等就可以删除文章，否则无法删除
     const currentUserId = route.params.id
+    const { userId } = proxy.$storage.getItem('userAllInfo')
     // 定义用户展示信息：
     let showUserInfo = reactive({})
     // 作者文章列表：
     const articlesList = ref([])
     // 获取用户个人信息：
     const getUserInfobyId = async () => {
-      const { data, code } = await proxy.$api.getNowUserInfo()
+      const { data, code } = await proxy.$api.getUserInfobyId(currentUserId)
       if (code === 500) {
         alert('亲，你还没登陆，请先登录呦！')
         router.push('/login')
@@ -81,7 +89,9 @@ export default {
       articlesList,
       changeInfo,
       getArticlesbyId,
-      deleteOk
+      deleteOk,
+      userId,
+      currentUserId
     }
   }
 }
@@ -96,6 +106,7 @@ export default {
   width: 100%;
   height: .2rem;
   background-color: #f4f5f5;
+  margin-top: .5rem;
 }
 .mine{
   background-color: #fff;
@@ -126,10 +137,35 @@ export default {
     margin-top: .1rem;
     max-width: 2rem;
   }
+  &__tag{
+    font-size: .12rem;
+    background-color: #ffde66;
+    color: #d50101;
+    padding: 2px 4px;
+    border-radius: 4px;
+    max-width: .6rem;
+    margin: 0 auto;
+    margin-top: .05rem;
+  }
   &__email{
     margin: 0 auto;
     margin-top: .1rem;
     max-width: 2rem;
+  }
+}
+.noArticle{
+  width: 100%;
+  height: 3rem;
+  text-align: center;
+  color: #909090;
+  &__icon{
+    font-size: .8rem;
+    margin-top: 1rem;
+  }
+  &__tag{
+    font-size: .16rem;
+    margin-top: .1rem;
+    letter-spacing: .02rem;
   }
 }
 </style>

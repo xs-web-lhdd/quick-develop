@@ -9,12 +9,12 @@ import storage from './utils/storage'
 import api from './api'
 
 // 导入 Vant
-import { Lazyload, Form, Field, CellGroup, Button, Loading, DropdownMenu, DropdownItem, Toast } from 'vant'
+import { Lazyload, Form, Field, CellGroup, Button, Loading, DropdownMenu, DropdownItem, Toast, Dialog, RadioGroup, Radio } from 'vant'
 import 'vant/lib/index.css'
 
 // 导入 Element
-// import ElementPlus from 'element-plus'
-// import 'element-plus/lib/theme-chalk/index.css'
+import ElementPlus from 'element-plus'
+import 'element-plus/lib/theme-chalk/index.css'
 
 // 导入全局基本配置：
 import './assets/base.scss'
@@ -41,4 +41,8 @@ app
   .use(DropdownMenu)
   .use(DropdownItem)
   .use(Toast)
+  .use(Dialog)
+  .use(RadioGroup)
+  .use(Radio)
+  .use(ElementPlus)
   .mount('#app')

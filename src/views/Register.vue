@@ -47,7 +47,6 @@ export default {
       email: '',
       phoneNumber: ''
     })
-    console.log(proxy.$api)
     const { userName, passWord, phoneNumber, email } = toRefs(registerForm)
 
     // 提交时进行校验：

@@ -60,6 +60,9 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.home{
+  margin-top: .7rem;
+}
 .list{
   margin: .2rem .2rem 0 .2rem;
   &__top{

@@ -127,7 +127,7 @@ export default {
   margin-left: 1rem;
 }
 .md{
-  height: calc(100vh - 0.5rem);
+  height: calc(100vh - 1rem);
 }
 .md-toolbar-item{
   display: none !important;

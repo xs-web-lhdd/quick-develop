@@ -27,6 +27,7 @@
 
 <script>
 import { getCurrentInstance } from 'vue'
+import { Dialog } from 'vant'
 export default {
   name: 'ArticleItem',
   props: {
@@ -41,8 +42,14 @@ export default {
     const { proxy } = getCurrentInstance()
     // 删除某篇文章：
     const deleteArticle = async () => {
-      const { code } = await proxy.$api.deleteCurrentArticle(props.articleItem)
-      if (code === 200) { emit('deleteOk') }
+      Dialog.confirm({
+        message: '确认删除该篇文章吗？'
+      })
+        .then(async () => {
+          const { code } = await proxy.$api.deleteCurrentArticle(props.articleItem)
+          if (code === 200) { emit('deleteOk') }
+        })
+        .catch(() => {})
     }
     return {
       deleteArticle

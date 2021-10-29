@@ -2,7 +2,7 @@
   <div class="comment">
     <div class="comment__top">
       <textarea class="comment__area" v-model="commentContent" cols="52" rows="10" placeholder="留下你的评论"></textarea>
-      <button class="comment__button" @click="addComment">发表评论</button>
+      <button class="comment__button" @click="() => addComment(replyCommentId)">发表评论</button>
     </div>
     <div class="comment__all">
       <span class="comment__all__title">全部评论({{commentsNum}})</span>
@@ -21,53 +21,39 @@
             </div>
             <div class="comment__all__item__right__bottom">
               <div class="iconfont comment__all__item__right__bottom__support">&#xe611;&nbsp;点赞</div>
-              <div class="iconfont comment__all__item__right__bottom__comment">&#xe6a7;&nbsp;评论</div>
+              <div class="iconfont comment__all__item__right__bottom__comment" @click="() => reply(item.commentUserNickName, item.commentId)">&#xe6a7;&nbsp;评论</div>
+              <div class="comment__all__item__right__bottom__reply" v-if="item.childCommentNum" @click="seeReply">查看回复&nbsp;({{item.childCommentNum}})</div>
+              <div class="iconfont comment__all__item__right__bottom__delete" v-if="userId === item.commentUserId" @click="() => deleteSelfComment(item.commentId)">&#xed44;</div>
             </div>
-            <!-- 评论区中的二级评论 -->
-            <div class="comment__all">
-              <template v-for="item in commentsList" :key="item.commentId">
-                <div class="comment__all__item" style="border-bottom: none;" v-if="item.commentType === '2'">
-                  <img v-if="item.commentUserAvatar !== '发表评论的用户的头像'" class="comment__all__item__left" :src="item.commentUserAvatar" alt="" @click="() => changeUserPage(item.commentUserId)" />
-                  <img v-else class="comment__all__item__left" src="../assets/img/defaultAvatar.jpg" alt="" @click="() => changeUserPage(item.commentUserId)" />
-                  <div class="comment__all__item__right">
-                    <div class="comment__all__item__right__top">
-                      <div class="comment__all__item__right__top__one">{{item.commentUserNickName}}</div>
-                      <div class="comment__all__item__right__top__two">|</div>
-                      <div class="comment__all__item__right__top__three">time:xxxx-xx-xx</div>
-                    </div>
-                    <div class="comment__all__item__right__main">
-                      {{item.content}}
-                    </div>
-                    <div class="comment__all__item__right__bottom">
-                      <div class="iconfont comment__all__item__right__bottom__support">&#xe611;&nbsp;点赞</div>
-                      <div class="iconfont comment__all__item__right__bottom__comment">&#xe6a7;&nbsp;评论</div>
-                    </div>
-                  </div>
-                </div>
-              </template>
-            </div>
-
           </div>
         </div>
       </template>
     </div>
+  <ReplyLayer :isShow="isShow" />
   </div>
 </template>
 
 <script>
 import { getCurrentInstance, onMounted, ref, reactive } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { Dialog, Toast } from 'vant'
+// 引入回复层组件：
+import ReplyLayer from './replyLayer.vue'
 
 export default {
+  name: 'CommentArea',
+  components: { ReplyLayer },
   setup () {
     // 实例化:
     const { proxy } = getCurrentInstance()
     const route = useRoute()
     const router = useRouter()
     const currentArticleId = route.params.id
+    const { userId } = proxy.$storage.getItem('userAllInfo')
     // 得到本篇文章的所有评论
     const commentParams = reactive({
-      articleId: currentArticleId
+      articleId: currentArticleId,
+      pageSize: 10000
     })
     const commentsNum = ref(null)
     const commentsList = ref([])
@@ -88,16 +74,44 @@ export default {
     // 评论框里的内容:
     const commentContent = ref('')
     // 发表评论:
-    const addComment = async () => {
+    const replyCommentId = ref('')
+    const addComment = async (replyId) => {
       const res = await proxy.$api.addComment({
         content: commentContent.value,
         articleId: currentArticleId,
-        replyId: 0
+        replyId: replyId || 0
       })
       if (res.code === 200) {
         commentContent.value = ''
         getArticleComments()
       }
+    }
+    // 点击回复：
+    const reply = (replyUserName, replyCommentIdValue) => {
+      commentContent.value = `@${replyUserName}:`
+      replyCommentId.value = replyCommentIdValue
+    }
+    // 删除自己的评论：
+    const deleteSelfComment = (commentId) => {
+      Dialog.confirm({
+        message: '确定删除该条评论吗？每一条评论都是你在该星球的留言呢'
+      })
+        .then(async () => {
+          const { code } = await proxy.$api.deleteSelfComment(commentId)
+          if (code === 200) {
+            Toast.success('删除评论成功！')
+            getArticleComments()
+          } else {
+            Toast.fail('删除评论失败！')
+          }
+        })
+        .catch(() => {})
+    }
+    // 点击查看回复跳转到
+    const isShow = ref(false)
+    const seeReply = () => {
+      console.log(111)
+      isShow.value = !isShow.value
     }
     onMounted(() => {
       getArticleComments()
@@ -107,7 +121,13 @@ export default {
       commentsList,
       commentsNum,
       commentContent,
-      addComment
+      addComment,
+      replyCommentId,
+      reply,
+      userId,
+      deleteSelfComment,
+      seeReply,
+      isShow
     }
   }
 }
@@ -216,6 +236,16 @@ export default {
           color: #86909c;
           &__support{
             margin-right: .16rem;
+          }
+          &__reply{
+            margin-left: .3rem;
+            letter-spacing: .01rem;
+          }
+          &__delete{
+            position: absolute;
+            right: .2rem;
+            font-size: .18rem;
+            color: red;
           }
         }
       }

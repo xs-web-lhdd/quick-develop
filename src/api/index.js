@@ -96,6 +96,20 @@ export default {
       // mock: true
     })
   },
+  // 删除自己的评论：
+  deleteSelfComment (commentId) {
+    return request({
+      url: `/dqcomment/remove/${commentId}`,
+      method: 'get'
+    })
+  },
+  // 获取二级评论：
+  getFloorComment (params) {
+    return request({
+      url: `/dqcomment/dqroot/${params}`,
+      method: 'get'
+    })
+  },
   // 获取当前用户个人信息：
   getNowUserInfo () {
     return request({

@@ -6,6 +6,7 @@ export default createStore({
     userInfo: '',
     loading: false,
     userAllInfo: ''
+    // reply: ''
   },
   mutations: {
     // 将登录用户信息进行缓存：
@@ -22,6 +23,10 @@ export default createStore({
     changeLoading (state, value) {
       state.loading = value
     }
+    //
+    // changeReply (state, value) {
+    //   state.reply = value
+    // }
   },
   actions: {
   },

@@ -22,32 +22,36 @@
             <div class="comment__all__item__right__bottom">
               <div class="iconfont comment__all__item__right__bottom__support">&#xe611;&nbsp;点赞</div>
               <div class="iconfont comment__all__item__right__bottom__comment" @click="() => reply(item.commentUserNickName, item.commentId)">&#xe6a7;&nbsp;评论</div>
-              <div class="comment__all__item__right__bottom__reply" v-if="item.childCommentNum" @click="seeReply">查看回复&nbsp;({{item.childCommentNum}})</div>
+              <div class="comment__all__item__right__bottom__reply" v-if="item.childCommentNum" @click="() => seeReply(item.commentId, item)">查看回复&nbsp;({{item.childCommentNum}})</div>
               <div class="iconfont comment__all__item__right__bottom__delete" v-if="userId === item.commentUserId" @click="() => deleteSelfComment(item.commentId)">&#xed44;</div>
             </div>
           </div>
         </div>
       </template>
     </div>
-  <ReplyLayer :isShow="isShow" />
+  <ReplyLayer :isShow="isShow" :topTitle="topTitle" :replyCommentId="replyCommentId" @replyFloor="reply" />
+  <MaskLayer :maskIsShow="maskIsShow" @click="removeMask"/>
   </div>
 </template>
 
 <script>
 import { getCurrentInstance, onMounted, ref, reactive } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+// import { useStore } from 'vuex'
 import { Dialog, Toast } from 'vant'
 // 引入回复层组件：
-import ReplyLayer from './replyLayer.vue'
+import ReplyLayer from './ReplyLayer.vue'
+import MaskLayer from './MaskLayer.vue'
 
 export default {
   name: 'CommentArea',
-  components: { ReplyLayer },
+  components: { ReplyLayer, MaskLayer },
   setup () {
     // 实例化:
     const { proxy } = getCurrentInstance()
     const route = useRoute()
     const router = useRouter()
+    // const store = useStore()
     const currentArticleId = route.params.id
     const { userId } = proxy.$storage.getItem('userAllInfo')
     // 得到本篇文章的所有评论
@@ -87,9 +91,14 @@ export default {
       }
     }
     // 点击回复：
-    const reply = (replyUserName, replyCommentIdValue) => {
+    const reply = (replyUserName, replyCommentIdValue, rootOrFloor) => {
+      if (rootOrFloor === 1) {
+        isShow.value = false
+        maskIsShow.value = false
+      }
       commentContent.value = `@${replyUserName}:`
       replyCommentId.value = replyCommentIdValue
+      console.log(replyCommentId.value)
     }
     // 删除自己的评论：
     const deleteSelfComment = (commentId) => {
@@ -108,10 +117,20 @@ export default {
         .catch(() => {})
     }
     // 点击查看回复跳转到
+    const maskIsShow = ref(false)
     const isShow = ref(false)
-    const seeReply = () => {
-      console.log(111)
+    const topTitle = ref()
+    const seeReply = (replyCommentIdValue, itemValue) => {
       isShow.value = !isShow.value
+      maskIsShow.value = true
+      replyCommentId.value = replyCommentIdValue
+      topTitle.value = itemValue
+    }
+    // 点击遮罩层去掉阴影
+    const removeMask = () => {
+      maskIsShow.value = false
+      isShow.value = false
+      getArticleComments()
     }
     onMounted(() => {
       getArticleComments()
@@ -127,7 +146,10 @@ export default {
       userId,
       deleteSelfComment,
       seeReply,
-      isShow
+      isShow,
+      topTitle,
+      maskIsShow,
+      removeMask
     }
   }
 }
@@ -245,7 +267,7 @@ export default {
             position: absolute;
             right: .2rem;
             font-size: .18rem;
-            color: red;
+            color: #909090;
           }
         }
       }

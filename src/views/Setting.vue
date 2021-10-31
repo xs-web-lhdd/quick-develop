@@ -14,7 +14,7 @@
         <img v-if="userInfo.avatar" :src="userInfo.avatar" class="avatar">
         <i v-else class="el-icon-plus avatar-uploader-icon"></i>
       </el-upload>
-      <div class="set__avatar__introduce">支持jpg、png、jepg格式大小5M以内的图片</div>
+      <div class="set__avatar__introduce">支持jpg格式大小5M以内的图片</div>
     </div>
     <div class="set__item">
       <div class="set__item__userName">用户名</div>
@@ -98,10 +98,17 @@ export default {
     }
     // 头像上传前:
     const beforeAvatarUpload = (file) => {
-      // file.status = 'uploading'
-      // file.message = '上传中...'
-      console.log('上传前......')
-      // console.log(file)
+      console.log(file)
+      const isJPG = file.type === 'image/jpeg'
+      const isLt2M = file.size / 1024 / 1024 < 5
+
+      if (!isJPG) {
+        Toast.fail('上传头像图片只能是 JPG 格式!')
+      }
+      if (!isLt2M) {
+        Toast.fail('上传头像图片大小不能超过 5MB!')
+      }
+      return isJPG && isLt2M
     }
     // 上传成功:
     const handleAvatarSuccess = (e) => {
@@ -149,6 +156,12 @@ export default {
     height: .5rem;
     border-radius: 50%;
   }
+}
+.img{
+  width: .5rem;
+  height: .5rem;
+  text-align: center;
+  line-height: .5rem;
 }
 .set{
   margin: .2rem;

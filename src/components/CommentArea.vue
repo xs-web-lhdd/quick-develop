@@ -1,7 +1,7 @@
 <template>
   <div class="comment">
     <div class="comment__top">
-      <textarea class="comment__area" v-model="commentContent" cols="52" rows="10" placeholder="留下你的评论"></textarea>
+      <textarea class="comment__area" ref="textarea" v-model="commentContent" cols="52" rows="10" placeholder="留下你的评论"></textarea>
       <button class="comment__button" @click="() => addComment(replyCommentId)">发表评论</button>
     </div>
     <div class="comment__all">
@@ -98,7 +98,7 @@ export default {
       }
       commentContent.value = `@${replyUserName}:`
       replyCommentId.value = replyCommentIdValue
-      console.log(replyCommentId.value)
+      proxy.$refs.textarea.focus()
     }
     // 删除自己的评论：
     const deleteSelfComment = (commentId) => {

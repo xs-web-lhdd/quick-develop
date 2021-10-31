@@ -7,11 +7,15 @@
         <van-field
           v-model="userName"
           placeholder="请输入用户名"
+          :rules="[{ required: true, message: '请输入用户名' }]"
         />
         <van-field
           v-model="passWord"
           type="password"
           placeholder="请输入密码"
+          :rules="[
+            { required: true, message: '请输入密码' }
+          ]"
         />
       </van-cell-group>
       <div style="margin: 16px;">
@@ -21,14 +25,15 @@
       </div>
     </van-form>
 
+    <div class="register" @click="changeRegister">没有账号？去注册</div>
+    <div class="otherLogin">其他方式登录</div>
     <!-- gitee登录 -->
-    <div>
+    <div class="gitee">
       <a
         href="https://gitee.com/oauth/authorize?client_id=e21ada1875792c7df538e290dc403e377289ccfa94343a4aed715cd7f9297ee2&redirect_uri=http://www.codeman.ink:8848/login&response_type=code"
       >
         <div class="otherLoginItem">
-          <!-- <img src="~assets/img/gitee.png" alt="" /> -->
-          <span>使用Gitee一键登录</span>
+          <img class="img" src="../assets/img/gitee.svg" alt="">
         </div>
       </a>
     </div>
@@ -53,6 +58,9 @@ export default {
     })
     const { userName, passWord } = toRefs(loginForm)
 
+    const changeRegister = () => {
+      router.push('/register')
+    }
     // 提交时进行校验：
     const onSubmit = () => {
       proxy.$refs.loginForm.validate().then(async () => {
@@ -88,6 +96,7 @@ export default {
     return {
       userName,
       passWord,
+      changeRegister,
       onSubmit
     }
   }
@@ -107,6 +116,30 @@ export default {
     margin: 0 auto .4rem auto;
     width: .66rem;
     height: .66rem;
+  }
+}
+.register{
+  width: 1.5rem;
+  margin: 0 auto;
+  text-align: center;
+  color: #909090;
+}
+.otherLogin{
+  position: absolute;
+  top: 4rem;
+  left: 1.5rem;
+  color: #909090;
+}
+.gitee{
+  position: absolute;
+  top: 4.4rem;
+  .otherLoginItem{
+    width: 1rem;
+    text-align: center;
+    margin: 0 1.32rem;
+  }
+  .img{
+    width: .5rem;
   }
 }
 </style>

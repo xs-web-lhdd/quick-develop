@@ -7,19 +7,29 @@
         <van-field
           v-model="userName"
           placeholder="请输入用户名"
+          :rules="[{ required: true, message: '请输入用户名' }]"
         />
         <van-field
           v-model="passWord"
           type="password"
           placeholder="请输入密码"
+          :rules="[{ required: true, message: '请输入用户名' }]"
         />
         <van-field
           v-model="phoneNumber"
           placeholder="请输入手机号"
+          :rules="[
+            { required: true, message: '请填写手机号' },
+            { pattern: /^1[3456789]\d{9}$/, message: '手机号码格式错误！'}
+          ]"
         />
         <van-field
           v-model="email"
           placeholder="请输入邮箱"
+          :rules="[
+            { required: true, message: '请填写邮箱' },
+            { pattern: /^[a-zA-Z0-9]+([-_.][a-zA-Z0-9]+)*@[a-zA-Z0-9]+([-_.][a-zA-Z0-9]+)*\.[a-z]{2,}$/, message: '邮箱格式有误！'}
+          ]"
         />
       </van-cell-group>
       <div style="margin: 16px;">
@@ -28,6 +38,7 @@
         </van-button>
       </div>
     </van-form>
+    <div class="login" @click="changeLogin">已有账号？去登录</div>
   </div>
 </template>
 
@@ -63,12 +74,16 @@ export default {
         }
       })
     }
+    const changeLogin = () => {
+      router.push('/login')
+    }
     return {
       userName,
       passWord,
       phoneNumber,
       email,
-      onSubmit
+      onSubmit,
+      changeLogin
     }
   }
 }
@@ -88,5 +103,11 @@ export default {
     width: .66rem;
     height: .66rem;
   }
+}
+.login{
+  width: 1.5rem;
+  margin: 0 auto;
+  text-align: center;
+  color: #909090;
 }
 </style>

@@ -6,6 +6,9 @@ const routes = [
   {
     path: '/',
     name: 'Home',
+    meta: {
+      keepAlive: true
+    },
     component: Home
   },
   {
